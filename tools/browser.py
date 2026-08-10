@@ -11,6 +11,22 @@ def browser_ac():
 
     global driver
 
+    # Eski Selenium oturumu kapanmışsa yeniden oluştur
+    if driver is not None:
+
+        try:
+            driver.current_url
+
+        except Exception:
+
+            try:
+                driver.quit()
+            except:
+                pass
+
+            driver = None
+
+
     if driver is None:
 
         options = webdriver.ChromeOptions()
@@ -32,6 +48,8 @@ def browser_ac():
 
 def siteye_git(url):
 
+    global driver
+
     try:
 
         browser = browser_ac()
@@ -44,10 +62,15 @@ def siteye_git(url):
 
         print("Browser Hatası:", e)
 
+        # Eski session'ı temizle
+        driver = None
+
         return False
 
 
 def google_ara(aranacak):
+
+    global driver
 
     try:
 
@@ -65,20 +88,25 @@ def google_ara(aranacak):
 
         print("Arama Hatası:", e)
 
+        driver = None
+
         return False
-    
+
 
 def youtube_ara(aranacak):
+
+    global driver
 
     try:
 
         browser = browser_ac()
 
-        from urllib.parse import quote
-
         kelime = quote(aranacak)
 
-        url = f"https://www.youtube.com/results?search_query={kelime}"
+        url = (
+            "https://www.youtube.com/results?search_query="
+            + kelime
+        )
 
         browser.get(url)
 
@@ -87,5 +115,7 @@ def youtube_ara(aranacak):
     except Exception as e:
 
         print("YouTube Arama Hatası:", e)
+
+        driver = None
 
         return False
