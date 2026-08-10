@@ -1,38 +1,105 @@
+import ctypes
 import subprocess
+import time
+
 import psutil
 
 from tools.appfinder import program_bul
 
 
-def program_ac(program):
+user32 = ctypes.windll.user32
 
+SW_RESTORE = 9
+SW_SHOW = 5
+
+
+def _pencereyi_one_getir(pid, timeout=5):
+    bulunan_pencere = []
+
+    ENUM_WINDOWS_PROC = ctypes.WINFUNCTYPE(
+        ctypes.c_bool,
+        ctypes.c_void_p,
+        ctypes.c_void_p,
+    )
+
+    def pencere_bul(hwnd, lparam):
+        pencere_pid = ctypes.c_ulong()
+        user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pencere_pid))
+
+        gorunur = user32.IsWindowVisible(hwnd)
+        baslik_uzunlugu = user32.GetWindowTextLengthW(hwnd)
+
+        if pencere_pid.value == pid and gorunur and baslik_uzunlugu > 0:
+            bulunan_pencere.append(hwnd)
+            return False
+
+        return True
+
+    callback = ENUM_WINDOWS_PROC(pencere_bul)
+    bitis = time.time() + timeout
+
+    while time.time() < bitis:
+        bulunan_pencere.clear()
+        user32.EnumWindows(callback, 0)
+
+        if bulunan_pencere:
+            hwnd = bulunan_pencere[0]
+
+            user32.ShowWindow(hwnd, SW_RESTORE)
+            user32.ShowWindow(hwnd, SW_SHOW)
+
+            aktif_pencere = user32.GetForegroundWindow()
+            aktif_thread = user32.GetWindowThreadProcessId(aktif_pencere, None)
+            hedef_thread = user32.GetWindowThreadProcessId(hwnd, None)
+
+            if aktif_thread != hedef_thread:
+                user32.AttachThreadInput(aktif_thread, hedef_thread, True)
+
+            user32.BringWindowToTop(hwnd)
+            user32.SetForegroundWindow(hwnd)
+            user32.SetFocus(hwnd)
+
+            if aktif_thread != hedef_thread:
+                user32.AttachThreadInput(aktif_thread, hedef_thread, False)
+
+            return True
+
+        time.sleep(0.1)
+
+    return False
+
+
+def program_ac(program):
     yol = program_bul(program)
 
-    if yol:
-        subprocess.Popen(yol)
-        return f"{program} açıldı."
+    if not yol:
+        return f"{program} bulunamadı."
 
-    return f"{program} bulunamadı."
+    try:
+        islem = subprocess.Popen(yol)
 
+        if _pencereyi_one_getir(islem.pid):
+            return f"{program} açıldı."
+
+        return f"{program} açıldı fakat penceresi öne getirilemedi."
+
+    except Exception:
+        return f"{program} açılamadı."
 
 
 def program_kapat(program):
-
     kapandi = False
 
     for islem in psutil.process_iter(["name"]):
-
         try:
             isim = islem.info["name"]
 
             if isim and program.lower() in isim.lower():
-
                 islem.kill()
                 kapandi = True
 
-        except:
+        except Exception:
             pass
-
 
     if kapandi:
         return f"{program} kapatıldı."

@@ -8,45 +8,35 @@ PROGRAMLAR = {
     "spotify": "spotify",
     "youtube": "chrome",
 
-    # Not Defteri
     "notepad": "notepad",
     "not defteri": "notepad",
     "not defterini": "notepad",
 
-    # Hesap Makinesi
     "calc": "calc",
     "hesap makinesi": "calc",
 }
 
 
 def calistir(komut):
-
     komut = komut.lower().strip()
 
-    # KAPATMA
     if "kapat" in komut:
-
         for kelime, program in PROGRAMLAR.items():
-
             if kelime in komut:
-
                 sonuc = program_kapat(program)
 
-                if sonuc:
+                if "kapatıldı." in sonuc:
                     return f"{kelime} kapatılıyor."
 
                 return f"{kelime} kapatılamadı."
 
-    # AÇMA
     for kelime, program in PROGRAMLAR.items():
-
         if kelime in komut:
-
             sonuc = program_ac(program)
 
-            if sonuc:
+            if sonuc == f"{program} açıldı.":
                 return f"{kelime} açılıyor."
 
-            return f"{kelime} bulunamadı."
+            return sonuc
 
     return "Hangi programı açacağımı anlayamadım."
