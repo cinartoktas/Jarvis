@@ -10,37 +10,60 @@ def execute(plan):
 
             tool = step.get("tool")
             action = step.get("action")
-
             target = step.get("target", "")
             content = step.get("content", "")
 
+            # =========================
+            # COMPUTER
+            # =========================
 
-            # PROGRAM AÇMA
             if tool == "computer":
+
+                from agents.computer_agent import calistir
 
                 if action == "open":
 
-                    from agents.computer_agent import calistir
-
                     sonuc = calistir(target)
 
-                    cevaplar.append(str(sonuc))
+                    cevaplar.append(
+                        str(sonuc)
+                    )
+
+                elif action == "close":
+
+                    sonuc = calistir(
+                        target + " kapat"
+                    )
+
+                    cevaplar.append(
+                        str(sonuc)
+                    )
 
 
-            # KLAVYE
+            # =========================
+            # KEYBOARD
+            # =========================
+
             elif tool == "keyboard":
+
+                from agents.keyboard_agent import yaz
 
                 if action == "write":
 
-                    from agents.keyboard_agent import yaz
+                    # Planner'dan gelen gerçek yazıyı kullan
+                    metin = content
 
-                    # Yazılacak metni content'ten al
-                    sonuc = yaz(content)
+                    sonuc = yaz(metin)
 
-                    cevaplar.append(str(sonuc))
+                    cevaplar.append(
+                        str(sonuc)
+                    )
 
 
+            # =========================
             # VISION
+            # =========================
+
             elif tool == "vision":
 
                 from agents.vision_agent import (
@@ -63,17 +86,27 @@ def execute(plan):
 
                     sonuc = tikla_yazi(target)
 
-                    cevaplar.append(str(sonuc))
+                    cevaplar.append(
+                        str(sonuc)
+                    )
 
 
+            # =========================
             # BROWSER
+            # =========================
+
             elif tool == "browser":
 
                 from agents.browser_agent import calistir
 
-                sonuc = calistir(target, action)
+                sonuc = calistir(
+                    target,
+                    action
+                )
 
-                cevaplar.append(str(sonuc))
+                cevaplar.append(
+                    str(sonuc)
+                )
 
 
         return cevaplar
