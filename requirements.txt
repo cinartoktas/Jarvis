@@ -6,3 +6,6 @@ tavily-python
 langgraph
 langchain-core
 langchain-openai
+psutil
+pyautogui
+pytesseract
