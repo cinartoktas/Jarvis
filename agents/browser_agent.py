@@ -11,29 +11,45 @@ SITELER = {
 
 def calistir(target, action="open"):
 
+    target = target.lower().strip()
+
     if action == "search":
 
-        if "youtube" in target:
+        # YouTube araması
+        if target.startswith("youtube "):
 
-            hedef = target.replace("youtube", "").strip()
+            hedef = target.replace(
+                "youtube",
+                "",
+                1
+            ).strip()
 
             youtube_ara(hedef)
 
             return f"YouTube'da {hedef} aranıyor."
 
+        # Google araması
+        if target.startswith("google "):
 
+            hedef = target.replace(
+                "google",
+                "",
+                1
+            ).strip()
+
+            google_ara(hedef)
+
+            return f"Google'da {hedef} aranıyor."
+
+        # Arama motoru belirtilmemişse Google kullan
         google_ara(target)
 
         return f"Google'da {target} aranıyor."
-
-
-    target = target.lower().strip()
 
     if target in SITELER:
 
         siteye_git(SITELER[target])
 
         return f"{target.capitalize()} açılıyor."
-
 
     return f"{target} tanınmıyor."

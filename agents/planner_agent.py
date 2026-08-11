@@ -85,8 +85,50 @@ JSON:
     ]
 }
 
+YouTube sadece kullanıcı açıkça YouTube'dan bahsediyorsa kullanılabilir.
 
-4. Kullanıcı ekrandaki yazıları okumak istiyorsa vision kullan.
+
+4. Kullanıcı bir arama yapmak istiyorsa:
+
+- Kullanıcı "youtube'da", "youtube üzerinde" veya açıkça YouTube'dan bahsediyorsa browser kullan ve target'ın başına "youtube" yaz.
+
+Örnek:
+youtube'da kedi videoları ara
+
+JSON:
+{
+"steps": [
+{
+"tool": "browser",
+"action": "search",
+"target": "youtube kedi videoları"
+}
+]
+}
+
+- Kullanıcı "google'da", "google üzerinde" veya açıkça Google'dan bahsediyorsa browser kullan ve target'ın başına "google" yaz.
+
+Örnek:
+google'da yapay zeka ara
+
+JSON:
+{
+"steps": [
+{
+"tool": "browser",
+"action": "search",
+"target": "google yapay zeka"
+}
+]
+}
+
+ÇOK ÖNEMLİ:
+Kullanıcı Google diyorsa ASLA youtube yazma.
+Kullanıcı YouTube diyorsa ASLA google yazma.
+Arama motoru belirtilmişse kullanıcının belirttiği motoru koru.
+
+
+5. Kullanıcı ekrandaki yazıları okumak istiyorsa vision kullan.
 
 Örnek:
 ekranı oku
@@ -102,7 +144,7 @@ JSON:
 }
 
 
-5. Kullanıcı ekrandaki belirli bir yazıya tıklamak istiyorsa vision kullan.
+6. Kullanıcı ekrandaki belirli bir yazıya tıklamak istiyorsa vision kullan.
 
 Örnek:
 google yazısına tıkla
@@ -119,7 +161,7 @@ JSON:
 }
 
 
-6. Kullanıcı klavyeden yazı yazmak istiyorsa keyboard kullan.
+7. Kullanıcı klavyeden yazı yazmak istiyorsa keyboard kullan.
 
 Örnek:
 merhaba yaz
@@ -136,7 +178,7 @@ JSON:
 }
 
 
-7. Kullanıcı NOT DEFTERİNE bir şey yazmak istiyorsa önce not defterini aç, sonra yaz.
+8. Kullanıcı NOT DEFTERİNE bir şey yazmak istiyorsa önce not defterini aç, sonra yaz.
 
 Örnek kullanıcı:
 not defterine merhaba yaz

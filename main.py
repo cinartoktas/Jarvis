@@ -39,7 +39,10 @@ while True:
             )
         )
 
-        if cevap:
+        if isinstance(cevap, list):
+            for mesaj in cevap:
+                print("Jarvis:", mesaj)
+        elif cevap:
             print("Jarvis:", cevap)
         else:
             print("Jarvis:", sonuc)
