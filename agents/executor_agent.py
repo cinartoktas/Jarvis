@@ -141,6 +141,29 @@ def execute(plan):
                 cevaplar.append(mesaj)
 
 
+            # =========================
+            # MOUSE
+            # =========================
+
+            elif tool == "mouse":
+
+                from agents.mouse_agent import tikla
+
+                if action == "click":  
+
+                    sonuc = tikla(target)
+
+                    if isinstance(sonuc, dict):
+                        mesaj = sonuc.get(
+                            "message",
+                            sonuc.get("response", str(sonuc))
+                        )
+                    else:
+                        mesaj = str(sonuc)
+
+                    cevaplar.append(mesaj)
+
+
         return cevaplar
 
 
