@@ -25,9 +25,15 @@ def execute(plan):
 
                     sonuc = calistir(target)
 
-                    cevaplar.append(
-                        str(sonuc)
-                    )
+                    if isinstance(sonuc, dict):
+                        mesaj = sonuc.get(
+                            "message",
+                            sonuc.get("response", str(sonuc))
+                        )
+                    else:
+                        mesaj = str(sonuc)
+
+                    cevaplar.append(mesaj)
 
                 elif action == "close":
 
@@ -35,9 +41,15 @@ def execute(plan):
                         target + " kapat"
                     )
 
-                    cevaplar.append(
-                        str(sonuc)
-                    )
+                    if isinstance(sonuc, dict):
+                        mesaj = sonuc.get(
+                            "message",
+                            sonuc.get("response", str(sonuc))
+                        )
+                    else:
+                        mesaj = str(sonuc)
+
+                    cevaplar.append(mesaj)
 
 
             # =========================
@@ -50,14 +62,19 @@ def execute(plan):
 
                 if action == "write":
 
-                    # Planner'dan gelen gerçek yazıyı kullan
                     metin = content
 
                     sonuc = yaz(metin)
 
-                    cevaplar.append(
-                        str(sonuc)
-                    )
+                    if isinstance(sonuc, dict):
+                        mesaj = sonuc.get(
+                            "message",
+                            sonuc.get("response", str(sonuc))
+                        )
+                    else:
+                        mesaj = str(sonuc)
+
+                    cevaplar.append(mesaj)
 
 
             # =========================
@@ -75,20 +92,29 @@ def execute(plan):
 
                     sonuc = ekran_oku()
 
-                    cevaplar.append(
-                        sonuc.get(
+                    if isinstance(sonuc, dict):
+                        mesaj = sonuc.get(
                             "text",
                             "Yazı bulunamadı"
                         )
-                    )
+                    else:
+                        mesaj = str(sonuc)
+
+                    cevaplar.append(mesaj)
 
                 elif action == "click_text":
 
                     sonuc = tikla_yazi(target)
 
-                    cevaplar.append(
-                        str(sonuc)
-                    )
+                    if isinstance(sonuc, dict):
+                        mesaj = sonuc.get(
+                            "message",
+                            sonuc.get("response", str(sonuc))
+                        )
+                    else:
+                        mesaj = str(sonuc)
+
+                    cevaplar.append(mesaj)
 
 
             # =========================
@@ -104,9 +130,15 @@ def execute(plan):
                     action
                 )
 
-                cevaplar.append(
-                    str(sonuc)
-                )
+                if isinstance(sonuc, dict):
+                    mesaj = sonuc.get(
+                        "message",
+                        sonuc.get("response", str(sonuc))
+                    )
+                else:
+                    mesaj = str(sonuc)
+
+                cevaplar.append(mesaj)
 
 
         return cevaplar
