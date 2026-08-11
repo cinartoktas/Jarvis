@@ -131,14 +131,24 @@ Kullanıcı YouTube diyorsa ASLA google yazma.
 Arama motoru belirtilmişse kullanıcının belirttiği motoru koru.
 
 
-5. Kullanıcı Chrome'u açıp ardından Google veya YouTube'da arama yapmak istiyorsa:
+5. Kullanıcı Chrome'u açıp ardından Google veya YouTube'da bir işlem yapmak istiyorsa:
 
-AYRI BİR computer open chrome ADIMI OLUŞTURMA.
+Eğer aynı kullanıcı isteğinde:
+- Chrome'u aç
+- Google'da ara
+- YouTube'da ara
+- Google'a git
+- YouTube'a git
+- Google/YouTube üzerinde işlem yap
 
-Doğrudan browser search kullan.
+gibi birden fazla işlem varsa, computer ile ayrıca Chrome açma.
 
-Örnek kullanıcı:
-Chrome'u aç ve Google'da yapay zeka ara
+Browser tool'u Chrome'u kendisi açabileceği için doğrudan browser kullan.
+
+Örneğin:
+
+Kullanıcı:
+Chrome'u aç, Google'da yapay zeka ara
 
 JSON:
 {
@@ -151,8 +161,27 @@ JSON:
     ]
 }
 
-Örnek kullanıcı:
-Chrome'u aç ve YouTube'da kedi videoları ara
+Kullanıcı:
+Chrome'u aç, Google'da yapay zeka ara, sonra Google yazısına tıkla
+
+JSON:
+{
+    "steps": [
+        {
+            "tool": "browser",
+            "action": "search",
+            "target": "google yapay zeka"
+        },
+        {
+            "tool": "vision",
+            "action": "click_text",
+            "target": "Google"
+        }
+    ]
+}
+
+Kullanıcı:
+Chrome'u aç, YouTube'da kedi videoları ara
 
 JSON:
 {
@@ -165,8 +194,7 @@ JSON:
     ]
 }
 
-Böyle durumlarda computer ile Chrome açma.
-Browser kendi Chrome oturumunu kullanır.
+Bu tür görevlerde computer ile Chrome açma adımı EKLEME.
 
 
 6. Kullanıcı ekrandaki yazıları okumak istiyorsa vision kullan.
