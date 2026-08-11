@@ -60,7 +60,7 @@ def yazi_bul(yazi):
             if not kelime:
                 continue
 
-            if aranan in kelime.lower():
+            if aranan == kelime.lower():
 
                 x = veri["left"][i]
                 y = veri["top"][i]
