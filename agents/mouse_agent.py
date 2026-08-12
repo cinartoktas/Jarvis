@@ -4,46 +4,40 @@ from tools.mouse import (
     cift_tik
 )
 
-from agents.vision_agent import bul
-
+from agents.vision_agent import yazi_bul
 
 
 def tikla(yazi):
 
-    sonuc = bul(yazi)
+    sonuc = yazi_bul(yazi)
 
+    if not sonuc["success"]:
+        return sonuc["error"]
 
-    if sonuc["bulundu"] == False:
-
-        return sonuc["mesaj"]
-
-
-    obje = sonuc["obje"]
-
+    x = sonuc["x"]
+    y = sonuc["y"]
 
     hareket_et(
-        obje["x"],
-        obje["y"]
+        x,
+        y
     )
-
 
     sol_tik()
 
-
     return f"{yazi} tıklandı"
-
 
 
 def calistir(komut):
 
     komut = komut.lower()
 
-
     if "tıkla" in komut:
 
-        kelime = komut.replace("tıkla", "").strip()
+        kelime = komut.replace(
+            "tıkla",
+            ""
+        ).strip()
 
         return tikla(kelime)
-
 
     return "Mouse komutu anlaşılamadı."
