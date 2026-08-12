@@ -32,32 +32,15 @@ vision:
 - read
 - click_text
 
-
 ÖNEMLİ KURALLAR:
 
 1. Kullanıcı bir PROGRAM açmak istiyorsa computer kullan.
 
-Örnek kullanıcı:
-not defteri aç
-
-JSON:
-{
-    "steps": [
-        {
-            "tool": "computer",
-            "action": "open",
-            "target": "notepad"
-        }
-    ]
-}
-
-
-2. Kullanıcı Chrome açmak istiyorsa computer kullan.
+2. Kullanıcı sadece Chrome açmak istiyorsa computer kullan.
 
 Örnek:
-google aç
+chrome aç
 
-JSON:
 {
     "steps": [
         {
@@ -68,13 +51,11 @@ JSON:
     ]
 }
 
-
-3. Kullanıcı YouTube açmak istiyorsa browser kullan.
+3. Kullanıcı sadece YouTube açmak istiyorsa browser kullan.
 
 Örnek:
 youtube aç
 
-JSON:
 {
     "steps": [
         {
@@ -85,17 +66,26 @@ JSON:
     ]
 }
 
-YouTube sadece kullanıcı açıkça YouTube'dan bahsediyorsa kullanılabilir.
+4. Kullanıcı Google'da arama yapmak istiyorsa browser kullan.
 
+Örnek:
+google'da yapay zeka ara
 
-4. Kullanıcı bir şey aramak istiyorsa:
+{
+    "steps": [
+        {
+            "tool": "browser",
+            "action": "search",
+            "target": "google yapay zeka"
+        }
+    ]
+}
 
-- Kullanıcı "youtube'da", "youtube üzerinde" veya açıkça YouTube'dan bahsediyorsa browser kullan.
+5. Kullanıcı YouTube'da arama yapmak istiyorsa browser kullan.
 
 Örnek:
 youtube'da kedi videoları ara
 
-JSON:
 {
     "steps": [
         {
@@ -106,51 +96,18 @@ JSON:
     ]
 }
 
-- Kullanıcı "google'da", "google üzerinde" veya açıkça Google'dan bahsediyorsa browser kullan.
+Google denmişse ASLA youtube kullanma.
+
+YouTube denmişse ASLA google kullanma.
+
+6. Kullanıcı aynı istekte Chrome'u açıp Google veya YouTube üzerinde işlem yapmak istiyorsa computer ile ayrıca Chrome açma.
+
+Browser zaten Chrome'u açabilir.
 
 Örnek:
-google'da yapay zeka ara
 
-JSON:
-{
-    "steps": [
-        {
-            "tool": "browser",
-            "action": "search",
-            "target": "google yapay zeka"
-        }
-    ]
-}
-
-ÇOK ÖNEMLİ:
-
-Kullanıcı Google diyorsa ASLA youtube yazma.
-
-Kullanıcı YouTube diyorsa ASLA google yazma.
-
-Arama motoru belirtilmişse kullanıcının belirttiği motoru koru.
-
-
-5. Kullanıcı Chrome'u açıp ardından Google veya YouTube'da bir işlem yapmak istiyorsa:
-
-Eğer aynı kullanıcı isteğinde:
-- Chrome'u aç
-- Google'da ara
-- YouTube'da ara
-- Google'a git
-- YouTube'a git
-- Google/YouTube üzerinde işlem yap
-
-gibi birden fazla işlem varsa, computer ile ayrıca Chrome açma.
-
-Browser tool'u Chrome'u kendisi açabileceği için doğrudan browser kullan.
-
-Örneğin:
-
-Kullanıcı:
 Chrome'u aç, Google'da yapay zeka ara
 
-JSON:
 {
     "steps": [
         {
@@ -161,10 +118,12 @@ JSON:
     ]
 }
 
-Kullanıcı:
+7. Kullanıcı birden fazla işlem isterse doğru sırayla steps oluştur.
+
+Örnek:
+
 Chrome'u aç, Google'da yapay zeka ara, sonra Google yazısına tıkla
 
-JSON:
 {
     "steps": [
         {
@@ -180,29 +139,8 @@ JSON:
     ]
 }
 
-Kullanıcı:
-Chrome'u aç, YouTube'da kedi videoları ara
+8. Kullanıcı ekranı okumak istiyorsa vision kullan.
 
-JSON:
-{
-    "steps": [
-        {
-            "tool": "browser",
-            "action": "search",
-            "target": "youtube kedi videoları"
-        }
-    ]
-}
-
-Bu tür görevlerde computer ile Chrome açma adımı EKLEME.
-
-
-6. Kullanıcı ekrandaki yazıları okumak istiyorsa vision kullan.
-
-Örnek:
-ekranı oku
-
-JSON:
 {
     "steps": [
         {
@@ -212,13 +150,8 @@ JSON:
     ]
 }
 
+9. Kullanıcı ekrandaki yazıya tıklamak istiyorsa vision kullan.
 
-7. Kullanıcı ekrandaki belirli bir yazıya tıklamak istiyorsa vision kullan.
-
-Örnek:
-google yazısına tıkla
-
-JSON:
 {
     "steps": [
         {
@@ -229,13 +162,8 @@ JSON:
     ]
 }
 
+10. Kullanıcı klavyeden yazmak istiyorsa keyboard kullan.
 
-8. Kullanıcı klavyeden yazı yazmak istiyorsa keyboard kullan.
-
-Örnek:
-merhaba yaz
-
-JSON:
 {
     "steps": [
         {
@@ -246,13 +174,12 @@ JSON:
     ]
 }
 
+11. Kullanıcı not defterine yazmak istiyorsa önce not defterini aç, sonra yaz.
 
-9. Kullanıcı NOT DEFTERİNE bir şey yazmak istiyorsa önce not defterini aç, sonra yaz.
+Örnek:
 
-Örnek kullanıcı:
 not defterine merhaba yaz
 
-JSON:
 {
     "steps": [
         {
@@ -268,31 +195,7 @@ JSON:
     ]
 }
 
-
-ÇOK ÖNEMLİ:
-
-Kullanıcı sadece:
-
-"not defteri aç"
-"not defterini aç"
-"notepad aç"
-
-derse keyboard KULLANMA.
-
-Sadece:
-
-{
-    "steps": [
-        {
-            "tool": "computer",
-            "action": "open",
-            "target": "notepad"
-        }
-    ]
-}
-
-döndür.
-
+Kullanıcı sadece not defteri aç derse keyboard kullanma.
 
 Kullanıcı isteği:
 
@@ -306,7 +209,44 @@ Kullanıcı isteği:
         temiz = temiz.replace("```", "")
         temiz = temiz.strip()
 
-        return json.loads(temiz)
+        plan = json.loads(temiz)
+
+        steps = plan.get("steps", [])
+
+        kullanici_metni = girdi.lower()
+
+        chrome_ile_browser = (
+            "chrome" in kullanici_metni
+            and (
+                "google" in kullanici_metni
+                or "youtube" in kullanici_metni
+            )
+        )
+
+        yeni_steps = []
+
+        for step in steps:
+
+            tool = step.get("tool")
+            action = step.get("action")
+            target = str(step.get("target", "")).lower()
+
+            if target == "chrome" and action == "open":
+                step["tool"] = "computer"
+
+            if (
+                chrome_ile_browser
+                and step.get("tool") == "computer"
+                and step.get("action") == "open"
+                and str(step.get("target", "")).lower() == "chrome"
+            ):
+                continue
+
+            yeni_steps.append(step)
+
+        plan["steps"] = yeni_steps
+
+        return plan
 
     except Exception as e:
 
