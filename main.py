@@ -6,24 +6,73 @@ print("Çıkmak için: çık")
 print()
 
 
+# Bekleyen görev
+pending_plan = None
+
+
 while True:
 
     komut = input("Sen: ")
 
-    # Boş Enter'a basılırsa hiçbir şey yapma
+    # Boş Enter
     if not komut.strip():
         continue
 
+
     # Çıkış
-    if komut.lower().strip() in ["çık", "exit", "quit"]:
+    if komut.lower().strip() in [
+        "çık",
+        "exit",
+        "quit"
+    ]:
+
         print("Jarvis kapatılıyor.")
         break
 
+
     try:
 
-        sonuc = graph.invoke({
-            "user_input": komut
-        })
+        # =========================
+        # DEVAM ET
+        # =========================
+
+        if komut.lower().strip() in [
+            "devam et",
+            "devam",
+            "sürdür"
+        ]:
+
+            if pending_plan is None:
+
+                print(
+                    "Jarvis: Devam edilecek bekleyen "
+                    "bir görev yok."
+                )
+
+                continue
+
+
+            sonuc = graph.invoke({
+
+                "user_input": komut,
+
+                "pending_plan": pending_plan
+
+            })
+
+
+        # =========================
+        # NORMAL KOMUT
+        # =========================
+
+        else:
+
+            sonuc = graph.invoke({
+
+                "user_input": komut
+
+            })
+
 
         cevap = sonuc.get(
             "response",
@@ -39,13 +88,43 @@ while True:
             )
         )
 
+
+        # =========================
+        # PENDING PLAN
+        # =========================
+
+        pending_plan = sonuc.get(
+            "pending_plan"
+        )
+
+
+        # =========================
+        # CEVAP
+        # =========================
+
         if isinstance(cevap, list):
+
             for mesaj in cevap:
-                print("Jarvis:", mesaj)
+
+                print(
+                    "Jarvis:",
+                    mesaj
+                )
+
         elif cevap:
-            print("Jarvis:", cevap)
+
+            print(
+                "Jarvis:",
+                cevap
+            )
+
         else:
-            print("Jarvis:", sonuc)
+
+            print(
+                "Jarvis:",
+                sonuc
+            )
+
 
     except Exception as e:
 

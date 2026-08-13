@@ -5,8 +5,9 @@ def execute(plan):
     try:
 
         steps = plan.get("steps", [])
+        goal = plan.get("goal", "")
 
-        for step in steps:
+        for index, step in enumerate(steps):
 
             tool = step.get("tool")
             action = step.get("action")
@@ -30,10 +31,7 @@ def execute(plan):
                             "message",
                             sonuc.get(
                                 "response",
-                                sonuc.get(
-                                    "error",
-                                    str(sonuc)
-                                )
+                                str(sonuc)
                             )
                         )
                     else:
@@ -52,10 +50,7 @@ def execute(plan):
                             "message",
                             sonuc.get(
                                 "response",
-                                sonuc.get(
-                                    "error",
-                                    str(sonuc)
-                                )
+                                str(sonuc)
                             )
                         )
                     else:
@@ -74,19 +69,14 @@ def execute(plan):
 
                 if action == "write":
 
-                    metin = content
-
-                    sonuc = yaz(metin)
+                    sonuc = yaz(content)
 
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "message",
                             sonuc.get(
                                 "response",
-                                sonuc.get(
-                                    "error",
-                                    str(sonuc)
-                                )
+                                str(sonuc)
                             )
                         )
                     else:
@@ -113,10 +103,7 @@ def execute(plan):
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "text",
-                            sonuc.get(
-                                "error",
-                                "Yazı bulunamadı"
-                            )
+                            "Yazı bulunamadı"
                         )
                     else:
                         mesaj = str(sonuc)
@@ -131,9 +118,9 @@ def execute(plan):
                         mesaj = sonuc.get(
                             "message",
                             sonuc.get(
-                                "response",
+                                "error",
                                 sonuc.get(
-                                    "error",
+                                    "response",
                                     str(sonuc)
                                 )
                             )
@@ -157,18 +144,55 @@ def execute(plan):
                     action
                 )
 
+                # Google robot doğrulaması
                 if isinstance(sonuc, dict):
-                    mesaj = sonuc.get(
-                        "message",
-                        sonuc.get(
-                            "response",
+
+                    if sonuc.get("robot_verification"):
+
+                        mesaj = sonuc.get(
+                            "error",
+                            "Google robot doğrulaması gerekiyor."
+                        )
+
+                        cevaplar.append(mesaj)
+
+                        # Kalan adımları sakla
+                        kalan_adimlar = steps[index:]
+
+                        pending_plan = {
+                            "goal": goal,
+                            "steps": kalan_adimlar
+                        }
+
+                        return {
+                            "responses": cevaplar,
+                            "pending_plan": pending_plan
+                        }
+
+                if isinstance(sonuc, dict):
+
+                    if sonuc.get("success") is False:
+
+                        mesaj = sonuc.get(
+                            "error",
                             sonuc.get(
-                                "error",
+                                "message",
                                 str(sonuc)
                             )
                         )
-                    )
+
+                    else:
+
+                        mesaj = sonuc.get(
+                            "message",
+                            sonuc.get(
+                                "response",
+                                str(sonuc)
+                            )
+                        )
+
                 else:
+
                     mesaj = str(sonuc)
 
                 cevaplar.append(mesaj)
@@ -187,27 +211,48 @@ def execute(plan):
                     sonuc = tikla(target)
 
                     if isinstance(sonuc, dict):
+
                         mesaj = sonuc.get(
                             "message",
                             sonuc.get(
-                                "response",
+                                "error",
                                 sonuc.get(
-                                    "error",
+                                    "response",
                                     str(sonuc)
                                 )
                             )
                         )
+
                     else:
+
                         mesaj = str(sonuc)
 
                     cevaplar.append(mesaj)
 
 
-        return cevaplar
+            # =========================
+            # BİLİNMEYEN TOOL
+            # =========================
+
+            else:
+
+                cevaplar.append(
+                    f"Bilinmeyen tool: {tool}"
+                )
+
+
+        # Her şey tamamlandı
+        return {
+            "responses": cevaplar,
+            "pending_plan": None
+        }
 
 
     except Exception as e:
 
-        return [
-            f"Executor hata: {str(e)}"
-        ]
+        return {
+            "responses": [
+                f"Executor hata: {str(e)}"
+            ],
+            "pending_plan": None
+        }

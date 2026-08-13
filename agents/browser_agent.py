@@ -1,4 +1,12 @@
-from tools.browser import siteye_git, google_ara, youtube_ara
+from tools.browser import (
+    siteye_git,
+    google_ara,
+    youtube_ara,
+    youtube_ilk_video_ac,
+    google_ilk_sonuc_ac,
+    duckduckgo_ara,
+    duckduckgo_ilk_sonuc_ac
+)
 
 
 SITELER = {
@@ -19,30 +27,111 @@ def calistir(target, action="open"):
 
     target = target.lower().strip()
 
+
+    # =========================
+    # GOOGLE İLK SONUÇ
+    # =========================
+
+    if action == "open_first_result":
+
+        if aktif_site == "duckduckgo":
+
+            return duckduckgo_ilk_sonuc_ac()
+
+        sonuc = google_ilk_sonuc_ac()
+
+        if isinstance(sonuc, dict):
+
+            if sonuc.get("robot_verification"):
+
+                return {
+                    "success": False,
+                    "robot_verification": True,
+                    "error": (
+                        "Google robot doğrulaması istiyor."
+                    )
+                }
+
+            return sonuc
+
+        return {
+            "success": False,
+            "error": "Google sonucu açılamadı."
+        }
+
+
+    # =========================
+    # YOUTUBE İLK VİDEO
+    # =========================
+
+    if action == "open_first_video":
+
+        sonuc = youtube_ilk_video_ac()
+
+        if isinstance(sonuc, dict):
+            return sonuc
+
+        return {
+            "success": False,
+            "error": "YouTube videosu açılamadı."
+        }
+
+
+    # =========================
+    # ARAMA
+    # =========================
+
     if action == "search":
 
-        # Açıkça YouTube belirtilmişse YouTube'da ara.
-        if target.startswith("youtube "):
+
+        # -------------------------
+        # YOUTUBE
+        # -------------------------
+
+        if target.startswith("google "):
 
             hedef = target.replace(
-                "youtube",
+                "google",
                 "",
-                1
+            1
             ).strip()
 
-            sonuc = youtube_ara(hedef)
+            sonuc = google_ara(hedef)
 
             if not sonuc.get("success", False):
+
+                if sonuc.get("robot_verification"):
+
+                    # Google engellediyse alternatif arama kullan.
+                    alternatif = duckduckgo_ara(hedef)
+
+                    if not alternatif.get("success", False):
+                        return alternatif
+
+                    aktif_site = "duckduckgo"
+
+                    return {
+                        "success": True,
+                        "message": (
+                            f"Google doğrulama istedi. "
+                            f"Alternatif aramada {hedef} aranıyor."
+                        ),
+                        "fallback": True
+                    }
+
                 return sonuc
 
-            aktif_site = "youtube"
+            aktif_site = "google"
 
             return {
-                "success": True,
-                "message": f"YouTube'da {hedef} aranıyor."
+            "success": True,
+                "message": f"Google'da {hedef} aranıyor."
             }
 
-        # Açıkça Google belirtilmişse Google'da ara.
+        # -------------------------
+        # GOOGLE
+        # -------------------------
+
         if target.startswith("google "):
 
             hedef = target.replace(
@@ -75,8 +164,11 @@ def calistir(target, action="open"):
                 "message": f"Google'da {hedef} aranıyor."
             }
 
-        # Arama motoru belirtilmemişse
-        # en son açılan siteyi kullan.
+
+        # -------------------------
+        # AKTİF SITE YOUTUBE
+        # -------------------------
+
         if aktif_site == "youtube":
 
             sonuc = youtube_ara(target)
@@ -88,6 +180,11 @@ def calistir(target, action="open"):
                 "success": True,
                 "message": f"YouTube'da {target} aranıyor."
             }
+
+
+        # -------------------------
+        # AKTİF SITE GOOGLE
+        # -------------------------
 
         if aktif_site == "google":
 
@@ -113,7 +210,11 @@ def calistir(target, action="open"):
                 "message": f"Google'da {target} aranıyor."
             }
 
-        # Hiçbir site açılmamışsa varsayılan Google.
+
+        # -------------------------
+        # VARSAYILAN GOOGLE
+        # -------------------------
+
         sonuc = google_ara(target)
 
         if not sonuc.get("success", False):
@@ -138,11 +239,19 @@ def calistir(target, action="open"):
             "message": f"Google'da {target} aranıyor."
         }
 
+
+    # =========================
+    # SITE AÇ
+    # =========================
+
     if target in SITELER:
 
-        sonuc = siteye_git(SITELER[target])
+        sonuc = siteye_git(
+            SITELER[target]
+        )
 
         if not sonuc:
+
             return {
                 "success": False,
                 "error": f"{target} açılamadı."
@@ -154,6 +263,7 @@ def calistir(target, action="open"):
             "success": True,
             "message": f"{target.capitalize()} açılıyor."
         }
+
 
     return {
         "success": False,

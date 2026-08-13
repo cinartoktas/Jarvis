@@ -23,6 +23,10 @@ def hafiza_yonlendir(state: JarvisState):
     if state.get("memory_handled"):
         return "end"
 
+    # Bekleyen plan varsa Planner'a gitme
+    if state.get("pending_plan"):
+        return "executor"
+
     return "planner"
 
 
@@ -39,12 +43,16 @@ def planner_node(state: JarvisState):
 
 def executor_node(state: JarvisState):
 
-    sonuc = execute(
-        state["plan"]
-    )
+    plan = state.get("pending_plan")
+
+    if not plan:
+        plan = state["plan"]
+
+    sonuc = execute(plan)
 
     return {
-        "response": sonuc
+        "response": sonuc.get("responses", []),
+        "pending_plan": sonuc.get("pending_plan")
     }
 
 
@@ -77,6 +85,7 @@ graph_builder.add_conditional_edges(
     hafiza_yonlendir,
     {
         "planner": "planner",
+        "executor": "executor",
         "end": END
     }
 )
