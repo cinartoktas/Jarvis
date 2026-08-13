@@ -28,7 +28,13 @@ def execute(plan):
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "message",
-                            sonuc.get("response", str(sonuc))
+                            sonuc.get(
+                                "response",
+                                sonuc.get(
+                                    "error",
+                                    str(sonuc)
+                                )
+                            )
                         )
                     else:
                         mesaj = str(sonuc)
@@ -44,7 +50,13 @@ def execute(plan):
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "message",
-                            sonuc.get("response", str(sonuc))
+                            sonuc.get(
+                                "response",
+                                sonuc.get(
+                                    "error",
+                                    str(sonuc)
+                                )
+                            )
                         )
                     else:
                         mesaj = str(sonuc)
@@ -69,7 +81,13 @@ def execute(plan):
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "message",
-                            sonuc.get("response", str(sonuc))
+                            sonuc.get(
+                                "response",
+                                sonuc.get(
+                                    "error",
+                                    str(sonuc)
+                                )
+                            )
                         )
                     else:
                         mesaj = str(sonuc)
@@ -95,7 +113,10 @@ def execute(plan):
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "text",
-                            "Yazı bulunamadı"
+                            sonuc.get(
+                                "error",
+                                "Yazı bulunamadı"
+                            )
                         )
                     else:
                         mesaj = str(sonuc)
@@ -109,7 +130,13 @@ def execute(plan):
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "message",
-                            sonuc.get("response", str(sonuc))
+                            sonuc.get(
+                                "response",
+                                sonuc.get(
+                                    "error",
+                                    str(sonuc)
+                                )
+                            )
                         )
                     else:
                         mesaj = str(sonuc)
@@ -133,7 +160,13 @@ def execute(plan):
                 if isinstance(sonuc, dict):
                     mesaj = sonuc.get(
                         "message",
-                        sonuc.get("response", str(sonuc))
+                        sonuc.get(
+                            "response",
+                            sonuc.get(
+                                "error",
+                                str(sonuc)
+                            )
+                        )
                     )
                 else:
                     mesaj = str(sonuc)
@@ -149,14 +182,20 @@ def execute(plan):
 
                 from agents.mouse_agent import tikla
 
-                if action == "click":  
+                if action == "click":
 
                     sonuc = tikla(target)
 
                     if isinstance(sonuc, dict):
                         mesaj = sonuc.get(
                             "message",
-                            sonuc.get("response", str(sonuc))
+                            sonuc.get(
+                                "response",
+                                sonuc.get(
+                                    "error",
+                                    str(sonuc)
+                                )
+                            )
                         )
                     else:
                         mesaj = str(sonuc)
