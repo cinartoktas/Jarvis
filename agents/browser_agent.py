@@ -32,11 +32,8 @@ def calistir(target, action="open"):
 
             sonuc = youtube_ara(hedef)
 
-            if not sonuc:
-                return {
-                    "success": False,
-                    "error": "YouTube araması başarısız oldu."
-                }
+            if not sonuc.get("success", False):
+                return sonuc
 
             aktif_site = "youtube"
 
@@ -56,11 +53,20 @@ def calistir(target, action="open"):
 
             sonuc = google_ara(hedef)
 
-            if not sonuc:
-                return {
-                    "success": False,
-                    "error": "Google araması başarısız oldu."
-                }
+            if not sonuc.get("success", False):
+
+                if sonuc.get("robot_verification"):
+
+                    return {
+                        "success": False,
+                        "error": (
+                            "Google robot doğrulaması istiyor. "
+                            "Lütfen Chrome'daki doğrulamayı tamamla."
+                        ),
+                        "robot_verification": True
+                    }
+
+                return sonuc
 
             aktif_site = "google"
 
@@ -75,11 +81,8 @@ def calistir(target, action="open"):
 
             sonuc = youtube_ara(target)
 
-            if not sonuc:
-                return {
-                    "success": False,
-                    "error": "YouTube araması başarısız oldu."
-                }
+            if not sonuc.get("success", False):
+                return sonuc
 
             return {
                 "success": True,
@@ -90,11 +93,20 @@ def calistir(target, action="open"):
 
             sonuc = google_ara(target)
 
-            if not sonuc:
-                return {
-                    "success": False,
-                    "error": "Google araması başarısız oldu."
-                }
+            if not sonuc.get("success", False):
+
+                if sonuc.get("robot_verification"):
+
+                    return {
+                        "success": False,
+                        "error": (
+                            "Google robot doğrulaması istiyor. "
+                            "Lütfen Chrome'daki doğrulamayı tamamla."
+                        ),
+                        "robot_verification": True
+                    }
+
+                return sonuc
 
             return {
                 "success": True,
@@ -104,11 +116,20 @@ def calistir(target, action="open"):
         # Hiçbir site açılmamışsa varsayılan Google.
         sonuc = google_ara(target)
 
-        if not sonuc:
-            return {
-                "success": False,
-                "error": "Google araması başarısız oldu."
-            }
+        if not sonuc.get("success", False):
+
+            if sonuc.get("robot_verification"):
+
+                return {
+                    "success": False,
+                    "error": (
+                        "Google robot doğrulaması istiyor. "
+                        "Lütfen Chrome'daki doğrulamayı tamamla."
+                    ),
+                    "robot_verification": True
+                }
+
+            return sonuc
 
         aktif_site = "google"
 

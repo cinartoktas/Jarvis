@@ -26,7 +26,6 @@ def browser_ac():
 
             driver = None
 
-
     if driver is None:
 
         options = webdriver.ChromeOptions()
@@ -46,6 +45,37 @@ def browser_ac():
     return driver
 
 
+def robot_dogrulamasi_var_mi(browser):
+
+    try:
+
+        baslik = browser.title.lower()
+        kaynak = browser.page_source.lower()
+
+        anahtarlar = [
+            "captcha",
+            "recaptcha",
+            "robot",
+            "unusual traffic",
+            "verify you are human",
+            "i'm not a robot"
+        ]
+
+        for anahtar in anahtarlar:
+
+            if anahtar in baslik:
+                return True
+
+            if anahtar in kaynak:
+                return True
+
+        return False
+
+    except Exception:
+
+        return False
+
+
 def siteye_git(url):
 
     global driver
@@ -62,7 +92,6 @@ def siteye_git(url):
 
         print("Browser Hatası:", e)
 
-        # Eski session'ı temizle
         driver = None
 
         return False
@@ -82,7 +111,18 @@ def google_ara(aranacak):
 
         browser.get(url)
 
-        return True
+        if robot_dogrulamasi_var_mi(browser):
+
+            return {
+                "success": False,
+                "error": "Google robot doğrulaması istiyor.",
+                "robot_verification": True
+            }
+
+        return {
+            "success": True,
+            "robot_verification": False
+        }
 
     except Exception as e:
 
@@ -90,7 +130,11 @@ def google_ara(aranacak):
 
         driver = None
 
-        return False
+        return {
+            "success": False,
+            "error": f"Google araması başarısız oldu: {str(e)}",
+            "robot_verification": False
+        }
 
 
 def youtube_ara(aranacak):
@@ -110,7 +154,9 @@ def youtube_ara(aranacak):
 
         browser.get(url)
 
-        return True
+        return {
+            "success": True
+        }
 
     except Exception as e:
 
@@ -118,4 +164,7 @@ def youtube_ara(aranacak):
 
         driver = None
 
-        return False
+        return {
+            "success": False,
+            "error": f"YouTube araması başarısız oldu: {str(e)}"
+        }
