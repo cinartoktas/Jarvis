@@ -30,11 +30,20 @@ def calistir(target, action="open"):
                 1
             ).strip()
 
-            youtube_ara(hedef)
+            sonuc = youtube_ara(hedef)
+
+            if not sonuc:
+                return {
+                    "success": False,
+                    "error": "YouTube araması başarısız oldu."
+                }
 
             aktif_site = "youtube"
 
-            return f"YouTube'da {hedef} aranıyor."
+            return {
+                "success": True,
+                "message": f"YouTube'da {hedef} aranıyor."
+            }
 
         # Açıkça Google belirtilmişse Google'da ara.
         if target.startswith("google "):
@@ -45,39 +54,87 @@ def calistir(target, action="open"):
                 1
             ).strip()
 
-            google_ara(hedef)
+            sonuc = google_ara(hedef)
+
+            if not sonuc:
+                return {
+                    "success": False,
+                    "error": "Google araması başarısız oldu."
+                }
 
             aktif_site = "google"
 
-            return f"Google'da {hedef} aranıyor."
+            return {
+                "success": True,
+                "message": f"Google'da {hedef} aranıyor."
+            }
 
-        # Arama motoru belirtilmemişse,
+        # Arama motoru belirtilmemişse
         # en son açılan siteyi kullan.
         if aktif_site == "youtube":
 
-            youtube_ara(target)
+            sonuc = youtube_ara(target)
 
-            return f"YouTube'da {target} aranıyor."
+            if not sonuc:
+                return {
+                    "success": False,
+                    "error": "YouTube araması başarısız oldu."
+                }
+
+            return {
+                "success": True,
+                "message": f"YouTube'da {target} aranıyor."
+            }
 
         if aktif_site == "google":
 
-            google_ara(target)
+            sonuc = google_ara(target)
 
-            return f"Google'da {target} aranıyor."
+            if not sonuc:
+                return {
+                    "success": False,
+                    "error": "Google araması başarısız oldu."
+                }
+
+            return {
+                "success": True,
+                "message": f"Google'da {target} aranıyor."
+            }
 
         # Hiçbir site açılmamışsa varsayılan Google.
-        google_ara(target)
+        sonuc = google_ara(target)
+
+        if not sonuc:
+            return {
+                "success": False,
+                "error": "Google araması başarısız oldu."
+            }
 
         aktif_site = "google"
 
-        return f"Google'da {target} aranıyor."
+        return {
+            "success": True,
+            "message": f"Google'da {target} aranıyor."
+        }
 
     if target in SITELER:
 
-        siteye_git(SITELER[target])
+        sonuc = siteye_git(SITELER[target])
+
+        if not sonuc:
+            return {
+                "success": False,
+                "error": f"{target} açılamadı."
+            }
 
         aktif_site = target
 
-        return f"{target.capitalize()} açılıyor."
+        return {
+            "success": True,
+            "message": f"{target.capitalize()} açılıyor."
+        }
 
-    return f"{target} tanınmıyor."
+    return {
+        "success": False,
+        "error": f"{target} tanınmıyor."
+    }
