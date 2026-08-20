@@ -6,6 +6,10 @@ from agents.memory_agent import calistir as hafiza_calistir
 from models.state import JarvisState
 
 
+# =========================================================
+# HAFIZA
+# =========================================================
+
 def hafiza_node(state: JarvisState):
 
     kullanildi, cevap = hafiza_calistir(
@@ -18,22 +22,58 @@ def hafiza_node(state: JarvisState):
     }
 
 
+# =========================================================
+# HAFIZA YÖNLENDİRME
+# =========================================================
+
 def hafiza_yonlendir(state: JarvisState):
 
     if state.get("memory_handled"):
         return "end"
 
-    # Bekleyen plan varsa Planner'a gitme
-    if state.get("pending_plan"):
-        return "executor"
-
     return "planner"
 
 
+# =========================================================
+# PLANNER
+# =========================================================
+
 def planner_node(state: JarvisState):
 
+    kullanici_girdisi = state["user_input"]
+
+    # =====================================================
+    # DEVAM ET
+    # =====================================================
+
+    if kullanici_girdisi.strip().lower() in (
+        "devam et",
+        "devam",
+        "sürdür",
+        "surdur"
+    ):
+
+        pending = state.get("pending_plan")
+
+        if pending:
+
+            return {
+                "plan": pending
+            }
+
+        return {
+            "plan": {
+                "steps": [],
+                "goal": "Devam edilecek bekleyen görev bulunamadı."
+            }
+        }
+
+    # =====================================================
+    # NORMAL PLAN
+    # =====================================================
+
     plan = planla(
-        state["user_input"]
+        kullanici_girdisi
     )
 
     return {
@@ -41,22 +81,45 @@ def planner_node(state: JarvisState):
     }
 
 
+# =========================================================
+# EXECUTOR
+# =========================================================
+
 def executor_node(state: JarvisState):
 
-    plan = state.get("pending_plan")
+    sonuc = execute(
+        state["plan"]
+    )
 
-    if not plan:
-        plan = state["plan"]
+    # Executor artık sadece liste değil,
+    # durum bilgisi içeren dict döndürüyor.
 
-    sonuc = execute(plan)
+    if isinstance(sonuc, dict):
 
+        return {
+            "response": sonuc.get(
+                "response",
+                []
+            ),
+            "pending_plan": sonuc.get(
+                "pending_plan"
+            )
+        }
+
+    # Eski tip dönüş için güvenlik
     return {
-        "response": sonuc.get("responses", []),
-        "pending_plan": sonuc.get("pending_plan")
+        "response": sonuc,
+        "pending_plan": None
     }
 
 
-graph_builder = StateGraph(JarvisState)
+# =========================================================
+# GRAPH
+# =========================================================
+
+graph_builder = StateGraph(
+    JarvisState
+)
 
 
 graph_builder.add_node(
@@ -64,10 +127,12 @@ graph_builder.add_node(
     hafiza_node
 )
 
+
 graph_builder.add_node(
     "planner",
     planner_node
 )
+
 
 graph_builder.add_node(
     "executor",
@@ -75,27 +140,31 @@ graph_builder.add_node(
 )
 
 
+# Başlangıç
 graph_builder.set_entry_point(
     "hafiza"
 )
 
 
+# Hafıza sonrası
 graph_builder.add_conditional_edges(
     "hafiza",
     hafiza_yonlendir,
     {
         "planner": "planner",
-        "executor": "executor",
         "end": END
     }
 )
 
 
+# Planner → Executor
 graph_builder.add_edge(
     "planner",
     "executor"
 )
 
+
+# Executor → END
 graph_builder.add_edge(
     "executor",
     END

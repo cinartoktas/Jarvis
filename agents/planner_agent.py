@@ -1,37 +1,483 @@
-from ai import ai_cevapla
+import re
 import json
 
+from ai import ai_cevapla
 
-def planla(girdi):
 
-    prompt = """
-Sen Jarvis isimli yapay zekanın planlayıcısısın.
+# =========================================================
+# HIZLI PLANLAYICI
+# =========================================================
+# Basit ve sık kullanılan komutları LLM'e göndermeden çözer.
+# Böylece 20-30 saniyelik planner beklemesi ortadan kalkar.
+# =========================================================
 
-Kullanıcının isteğini analiz et.
-Kullanıcının ne yapmak istediğini anla ve gerekli araçları doğru sırayla seç.
+def hizli_planla(girdi):
 
-Kullanıcıya teknik işlemleri tarif ettirme.
-Kullanıcı sadece istediği sonucu söyleyebilir.
-Gerekli araç ve adımları kendin belirle.
+    metin = girdi.strip()
+    kucuk = metin.lower()
 
-SADECE JSON döndür.
-Başka hiçbir açıklama yazma.
+    # =====================================================
+    # YOUTUBE - VİDEO AÇ
+    # =====================================================
 
-JSON formatı:
+    if (
+        "youtube" in kucuk
+        and "video" in kucuk
+        and ("aç" in kucuk or "ac" in kucuk)
+    ):
 
-{
-    "goal": "kullanıcının ulaşmak istediği nihai sonuç",
-    "steps": [
-        {
-            "tool": "...",
-            "action": "...",
-            "target": "...",
-            "content": "..."
+        arama = metin
+
+        # YouTube ifadesini kaldır
+        arama = re.sub(
+            r"youtube(?:'da|’da| da|da)?",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        # "da / de" kalıntılarını kaldır
+        arama = re.sub(
+            r"\bda\b|\bde\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        # Açma ifadelerini kaldır
+        arama = re.sub(
+            r"videolarından birini aç",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"videolarindan birini ac",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"ilk videoyu aç",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"ilk videoyu ac",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"videoyu aç",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"videoyu ac",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"videosu aç",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"videosu ac",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"video aç",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"video ac",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        # Gereksiz kelimeler
+        arama = re.sub(
+            r"\bbirini\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\bilk\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\s+",
+            " ",
+            arama
+        ).strip()
+
+        if arama:
+
+            return {
+                "goal": metin,
+                "steps": [
+                    {
+                        "tool": "browser",
+                        "action": "search",
+                        "target": f"youtube {arama}"
+                    },
+                    {
+                        "tool": "browser",
+                        "action": "open_first_video"
+                    }
+                ]
+            }
+
+
+    # =====================================================
+    # GOOGLE - İLK SONUÇ
+    # =====================================================
+
+    if (
+        "google" in kucuk
+        and (
+            "ilk sonucu" in kucuk
+            or "ilk sonuca" in kucuk
+        )
+    ):
+
+        arama = metin
+
+        # Google ifadesini kaldır
+        arama = re.sub(
+            r"google(?:'da|’da| da|da)?",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        # "da / de" kalıntıları
+        arama = re.sub(
+            r"\bda\b|\bde\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        # İstek sonundaki işlemleri temizle
+        arama = re.sub(
+            r"bilgi bul",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"bilgi ara",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"ilk sonucu aç",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"ilk sonucu ac",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"ilk sonuca git",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\s+",
+            " ",
+            arama
+        ).strip()
+
+        # "ve" gibi bağlaçları sadece başta/sonda temizle
+        arama = re.sub(
+            r"^\s*ve\s+",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\s+ve\s*$",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = arama.strip()
+
+        if arama:
+
+            return {
+                "goal": metin,
+                "steps": [
+                    {
+                        "tool": "browser",
+                        "action": "search",
+                        "target": f"google {arama}"
+                    },
+                    {
+                        "tool": "browser",
+                        "action": "open_first_result"
+                    }
+                ]
+            }
+
+
+    # =====================================================
+    # GOOGLE - SADECE ARAMA
+    # =====================================================
+
+    if (
+        "google" in kucuk
+        and (
+            "ara" in kucuk
+            or "arama yap" in kucuk
+        )
+    ):
+
+        arama = metin
+
+        arama = re.sub(
+            r"google(?:'da|’da| da|da)?",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\bda\b|\bde\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"arama yap",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\bara\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\s+",
+            " ",
+            arama
+        ).strip()
+
+        if arama:
+
+            return {
+                "goal": metin,
+                "steps": [
+                    {
+                        "tool": "browser",
+                        "action": "search",
+                        "target": f"google {arama}"
+                    }
+                ]
+            }
+
+
+    # =====================================================
+    # YOUTUBE - SADECE ARAMA
+    # =====================================================
+
+    if (
+        "youtube" in kucuk
+        and (
+            "ara" in kucuk
+            or "arama yap" in kucuk
+        )
+    ):
+
+        arama = metin
+
+        arama = re.sub(
+            r"youtube(?:'da|’da| da|da)?",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\bda\b|\bde\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"arama yap",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\bara\b",
+            "",
+            arama,
+            flags=re.IGNORECASE
+        )
+
+        arama = re.sub(
+            r"\s+",
+            " ",
+            arama
+        ).strip()
+
+        if arama:
+
+            return {
+                "goal": metin,
+                "steps": [
+                    {
+                        "tool": "browser",
+                        "action": "search",
+                        "target": f"youtube {arama}"
+                    }
+                ]
+            }
+
+
+    # =====================================================
+    # NOT DEFTERİNE YAZ
+    # =====================================================
+
+    if (
+        "not defteri" in kucuk
+        and (
+            kucuk.endswith(" yaz")
+            or kucuk.endswith(" yaz.")
+        )
+    ):
+
+        icerik = re.sub(
+            r"^not defterine\s*",
+            "",
+            metin,
+            flags=re.IGNORECASE
+        )
+
+        icerik = re.sub(
+            r"\s+yaz\.?$",
+            "",
+            icerik,
+            flags=re.IGNORECASE
+        )
+
+        icerik = icerik.strip()
+
+        if icerik:
+
+            return {
+                "goal": metin,
+                "steps": [
+                    {
+                        "tool": "computer",
+                        "action": "open",
+                        "target": "notepad"
+                    },
+                    {
+                        "tool": "keyboard",
+                        "action": "write",
+                        "content": icerik
+                    }
+                ]
+            }
+
+
+    # =====================================================
+    # CHROME AÇ
+    # =====================================================
+
+    if kucuk in (
+        "chrome aç",
+        "chrome ac",
+        "google chrome aç",
+        "google chrome ac"
+    ):
+
+        return {
+            "goal": metin,
+            "steps": [
+                {
+                    "tool": "computer",
+                    "action": "open",
+                    "target": "chrome"
+                }
+            ]
         }
-    ]
-}
 
-Kullanılabilir toollar:
+
+    # =====================================================
+    # HIZLI PLAN YOK
+    # =====================================================
+
+    return None
+
+
+# =========================================================
+# LLM PLANNER
+# =========================================================
+
+def llm_planla(girdi):
+
+    prompt = f"""
+Sen Jarvis'in görev planlayıcısısın.
+
+Kullanıcı isteğini analiz et ve yapılması gereken işlemleri JSON olarak oluştur.
+
+SADECE JSON DÖNDÜR.
+Markdown kullanma.
+Açıklama yazma.
+
+Kullanılabilir araçlar:
 
 computer:
 - open
@@ -40,8 +486,8 @@ computer:
 browser:
 - open
 - search
-- open_first_result
 - open_first_video
+- open_first_result
 
 keyboard:
 - write
@@ -53,389 +499,85 @@ vision:
 - read
 - click_text
 
+Kurallar:
 
-ÖNEMLİ KURALLAR:
+- Program açma/kapatma için computer kullan.
+- Chrome açmak için computer kullan.
+- Web sitesi açmak için browser kullan.
+- Google araması için browser search kullan.
+- YouTube araması için browser search kullan.
+- YouTube'da ilk video istenirse search ardından open_first_video kullan.
+- Google'da ilk sonuç istenirse search ardından open_first_result kullan.
+- Ekrandaki yazıya tıklamak için vision click_text kullan.
+- Ekranı okumak için vision read kullan.
+- Klavyeden yazmak için keyboard write kullan.
+- Not defterine yazmak için önce notepad aç, sonra keyboard write kullan.
+- Birden fazla işlem varsa doğru sırayla steps oluştur.
+- Kullanıcı Chrome'u açıp aynı anda Google/YouTube işlemi istiyorsa ayrıca Chrome açma.
 
-
-1. PROGRAM AÇMA
-
-Kullanıcı bir program açmak istiyorsa computer kullan.
-
-Örnek:
-
-"not defterini aç"
-
-{
-    "goal": "Not defterini aç",
-    "steps": [
-        {
-            "tool": "computer",
-            "action": "open",
-            "target": "notepad"
-        }
-    ]
-}
-
-
-2. SADECE CHROME AÇMA
-
-Kullanıcı sadece Chrome açmak istiyorsa computer kullan.
-
-Örnek:
-
-"chrome aç"
-
-{
-    "goal": "Chrome'u aç",
-    "steps": [
-        {
-            "tool": "computer",
-            "action": "open",
-            "target": "chrome"
-        }
-    ]
-}
-
-
-3. SADECE WEB SİTESİ AÇMA
-
-Kullanıcı sadece YouTube açmak istiyorsa browser kullan.
-
-Örnek:
-
-"youtube aç"
-
-{
-    "goal": "YouTube'u aç",
-    "steps": [
-        {
-            "tool": "browser",
-            "action": "open",
-            "target": "youtube"
-        }
-    ]
-}
-
-
-4. GOOGLE'DA ARAMA
-
-Kullanıcı Google'da arama yapmak istiyorsa browser kullan.
-
-Örnek:
-
-"google'da yapay zeka ara"
-
-{
-    "goal": "Google'da yapay zeka araması yap",
-    "steps": [
-        {
-            "tool": "browser",
-            "action": "search",
-            "target": "google yapay zeka"
-        }
-    ]
-}
-
-Google denmişse YouTube kullanma.
-
-
-5. YOUTUBE'DA ARAMA
-
-Kullanıcı YouTube'da arama yapmak istiyorsa browser kullan.
-
-Örnek:
-
-"youtube'da kedi videoları ara"
-
-{
-    "goal": "YouTube'da kedi videoları ara",
-    "steps": [
-        {
-            "tool": "browser",
-            "action": "search",
-            "target": "youtube kedi videoları"
-        }
-    ]
-}
-
-YouTube denmişse Google kullanma.
-
-
-6. CHROME + GOOGLE / YOUTUBE
+ÖRNEK:
 
 Kullanıcı:
+YouTube'da kedi videosu aç
 
-"Chrome'u aç, Google'da yapay zeka ara"
-
-gibi bir istek verirse ayrıca computer ile Chrome açma.
-
-Browser zaten kendi Chrome oturumunu açabilir.
-
-Doğrudan browser kullan.
-
-Örnek:
-
-{
-    "goal": "Google'da yapay zeka araması yap",
+JSON:
+{{
+    "goal": "YouTube'da kedi videosu aç",
     "steps": [
-        {
+        {{
             "tool": "browser",
             "action": "search",
-            "target": "google yapay zeka"
-        }
+            "target": "youtube kedi videosu"
+        }},
+        {{
+            "tool": "browser",
+            "action": "open_first_video"
+        }}
     ]
-}
+}}
 
+Kullanıcı:
+Google'da Python hakkında bilgi bul ve ilk sonucu aç
 
-7. BİRDEN FAZLA İŞLEM
-
-Kullanıcı birden fazla işlem isterse gerekli adımları doğru sırayla oluştur.
-
-Gereksiz adım ekleme.
-
-Kullanıcının söylediği işlemleri mekanik olarak kopyalamak yerine,
-nihai amaca ulaşmak için gereken işlemleri belirle.
-
-
-8. EKRANI OKUMA
-
-Kullanıcı ekrandaki yazıları okumak istiyorsa vision kullan.
-
-Örnek:
-
-"ekranı oku"
-
-{
-    "goal": "Ekrandaki yazıları oku",
+JSON:
+{{
+    "goal": "Google'da Python hakkında bilgi bul ve ilk sonucu aç",
     "steps": [
-        {
-            "tool": "vision",
-            "action": "read"
-        }
+        {{
+            "tool": "browser",
+            "action": "search",
+            "target": "google Python hakkında"
+        }},
+        {{
+            "tool": "browser",
+            "action": "open_first_result"
+        }}
     ]
-}
+}}
 
+Kullanıcı:
+Not defterine Jarvis çalışıyor yaz
 
-9. EKRANDAKİ YAZIYA TIKLAMA
-
-Kullanıcı ekrandaki belirli bir yazıya tıklamak istiyorsa vision kullan.
-
-Örnek:
-
-"Google yazısına tıkla"
-
-{
-    "goal": "Google yazısına tıkla",
-    "steps": [
-        {
-            "tool": "vision",
-            "action": "click_text",
-            "target": "Google"
-        }
-    ]
-}
-
-Ancak tarayıcıdaki bilinen sonuçlar Selenium ile daha güvenilir şekilde
-yapılabiliyorsa vision ile tahmini OCR tıklaması kullanma.
-
-
-10. KLAVYE
-
-Kullanıcı klavyeden yazı yazmak istiyorsa keyboard kullan.
-
-Örnek:
-
-"merhaba yaz"
-
-{
-    "goal": "Merhaba yaz",
-    "steps": [
-        {
-            "tool": "keyboard",
-            "action": "write",
-            "content": "merhaba"
-        }
-    ]
-}
-
-
-11. NOT DEFTERİNE YAZMA
-
-Kullanıcı not defterine bir şey yazmak istiyorsa:
-
-önce not defterini aç,
-sonra keyboard ile yaz.
-
-Örnek:
-
-"not defterine Jarvis çalışıyor yaz"
-
-{
+JSON:
+{{
     "goal": "Not defterine Jarvis çalışıyor yaz",
     "steps": [
-        {
+        {{
             "tool": "computer",
             "action": "open",
             "target": "notepad"
-        },
-        {
+        }},
+        {{
             "tool": "keyboard",
             "action": "write",
             "content": "Jarvis çalışıyor"
-        }
+        }}
     ]
-}
-
-Kullanıcı sadece not defterini açmak istiyorsa keyboard kullanma.
-
-
-12. YOUTUBE'DA VİDEO BULUP AÇMA
-
-Kullanıcı YouTube'da bir video bulup açmak istiyorsa,
-arama yaptıktan sonra uygun ilk videoyu aç.
-
-Kullanıcının ayrıca "ilk videoya tıkla" demesini bekleme.
-
-Örnek:
-
-"YouTube'da kedi videolarından birini aç"
-
-{
-    "goal": "YouTube'da kedi videolarından birini aç",
-    "steps": [
-        {
-            "tool": "browser",
-            "action": "search",
-            "target": "youtube kedi videoları"
-        },
-        {
-            "tool": "browser",
-            "action": "open_first_video"
-        }
-    ]
-}
-
-
-13. GOOGLE'DA SONUÇ BULUP AÇMA
-
-Kullanıcı Google'da bir şey arayıp sonuçlardan birini açmak istiyorsa,
-arama yaptıktan sonra uygun ilk sonucu aç.
-
-Örnek:
-
-"Google'da Python hakkında bilgi bul ve ilk sonucu aç"
-
-{
-    "goal": "Google'da Python hakkında bilgi bul ve ilk sonucu aç",
-    "steps": [
-        {
-            "tool": "browser",
-            "action": "search",
-            "target": "google Python"
-        },
-        {
-            "tool": "browser",
-            "action": "open_first_result"
-        }
-    ]
-}
-
-
-14. SONUÇ ODAKLI KOMUTLAR
-
-Kullanıcı:
-
-- bul
-- ara
-- aç
-- getir
-- göster
-- bul ve aç
-- ara ve aç
-
-gibi ifadeler kullanabilir.
-
-Kullanıcı gerekli teknik işlemleri söylemek zorunda değildir.
-
-Örneğin:
-
-"Bana YouTube'da güzel bir kedi videosu aç"
-
-isteğinde:
-
-arama yap
-+
-uygun ilk videoyu aç
-
-adımlarını kendin oluştur.
-
-
-15. GEREKSİZ COMPUTER KULLANMA
-
-Browser'ın kendi Chrome oturumunu kullanabildiği görevlerde
-sadece Chrome'u ayrıca açmak için computer kullanma.
-
-Örneğin:
-
-"Chrome'u aç, YouTube'da kedi videosu ara"
-
-isteğinde:
-
-computer open chrome
-
-ekleme.
-
-Browser kullan.
-
-
-16. ARAMA MOTORUNU KORU
-
-Kullanıcı Google diyorsa Google kullan.
-
-Kullanıcı YouTube diyorsa YouTube kullan.
-
-Arama motoru açıkça belirtilmişse değiştirme.
-
-
-17. GOAL ZORUNLU
-
-Her JSON çıktısında goal alanı bulunmalıdır.
-
-goal kullanıcının nihai amacını kısa şekilde anlatmalıdır.
-
-
-18. BOŞ VE GEREKSİZ STEP EKLEME
-
-Kullanıcının isteği için gerekli olmayan tool veya step ekleme.
-
-Aynı işlemi iki kere yapma.
-
-
-19. DOĞAL DİLİ ANLA
-
-Kullanıcı:
-
-"bana kedilerle ilgili bir video bul"
-
-derse bunu teknik komut olarak değil,
-bir görev olarak değerlendir.
-
-Gerekli araçları kendin seç.
-
-
-20. VİZYON VE BROWSER ARASINDA TERCİH
-
-Bir web sayfasındaki bilinen sonuç veya video Selenium ile bulunabiliyorsa
-browser kullan.
-
-Ekrandaki herhangi bir görsel yazıya doğrudan tıklamak gerekiyorsa
-vision kullan.
-
+}}
 
 Kullanıcı isteği:
-
-""" + girdi
-
+{girdi}
+"""
 
     cevap = ai_cevapla(prompt)
 
@@ -447,66 +589,11 @@ Kullanıcı isteği:
 
         plan = json.loads(temiz)
 
-        if not isinstance(plan, dict):
-            return {
-                "goal": girdi,
-                "steps": []
-            }
-
         if "goal" not in plan:
             plan["goal"] = girdi
 
-        steps = plan.get("steps", [])
-
-        if not isinstance(steps, list):
-            steps = []
-
-        kullanici_metni = girdi.lower()
-
-        chrome_ile_browser = (
-            "chrome" in kullanici_metni
-            and (
-                "google" in kullanici_metni
-                or "youtube" in kullanici_metni
-            )
-        )
-
-        yeni_steps = []
-
-        for step in steps:
-
-            if not isinstance(step, dict):
-                continue
-
-            tool = step.get("tool")
-            action = step.get("action")
-
-            target = str(
-                step.get("target", "")
-            ).lower().strip()
-
-            # Chrome açma adımını güvenceye al
-            if (
-                target == "chrome"
-                and action == "open"
-            ):
-                step["tool"] = "computer"
-
-            # Chrome + browser görevi varsa
-            # gereksiz Chrome açma adımını kaldır.
-            if (
-                chrome_ile_browser
-                and step.get("tool") == "computer"
-                and step.get("action") == "open"
-                and str(
-                    step.get("target", "")
-                ).lower().strip() == "chrome"
-            ):
-                continue
-
-            yeni_steps.append(step)
-
-        plan["steps"] = yeni_steps
+        if "steps" not in plan:
+            plan["steps"] = []
 
         return plan
 
@@ -519,3 +606,20 @@ Kullanıcı isteği:
             "goal": girdi,
             "steps": []
         }
+
+
+# =========================================================
+# ANA PLANNER
+# =========================================================
+
+def planla(girdi):
+
+    # Önce hızlı planner.
+    # Basit komutlarda LLM hiç çalışmaz.
+    hizli = hizli_planla(girdi)
+
+    if hizli is not None:
+        return hizli
+
+    # Hızlı planner çözemiyorsa LLM'e gönder.
+    return llm_planla(girdi)

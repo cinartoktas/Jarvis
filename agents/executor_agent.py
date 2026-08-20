@@ -5,14 +5,25 @@ def execute(plan):
     try:
 
         steps = plan.get("steps", [])
-        goal = plan.get("goal", "")
 
-        for index, step in enumerate(steps):
+        # Daha önce yarım kalmış step bilgisi varsa
+        start_index = plan.get("_start_index", 0)
+
+        steps = plan.get("steps", [])
+
+        # Daha önce yarım kalmış görev varsa
+        # kaldığımız step'ten devam et.
+        start_index = plan.get("_start_index", 0)
+
+        for index in range(start_index, len(steps)):
+
+            step = steps[index]
 
             tool = step.get("tool")
             action = step.get("action")
             target = step.get("target", "")
             content = step.get("content", "")
+
 
             # =========================
             # COMPUTER
@@ -27,6 +38,24 @@ def execute(plan):
                     sonuc = calistir(target)
 
                     if isinstance(sonuc, dict):
+
+                        if sonuc.get("success") is False:
+
+                            cevaplar.append(
+                                sonuc.get(
+                                    "error",
+                                    "Bilgisayar işlemi başarısız oldu."
+                                )
+                            )
+
+                            return {
+                                "response": cevaplar,
+                                "pending_plan": {
+                                    "steps": steps,
+                                    "_start_index": index
+                                }
+                            }
+
                         mesaj = sonuc.get(
                             "message",
                             sonuc.get(
@@ -34,7 +63,9 @@ def execute(plan):
                                 str(sonuc)
                             )
                         )
+
                     else:
+
                         mesaj = str(sonuc)
 
                     cevaplar.append(mesaj)
@@ -46,6 +77,24 @@ def execute(plan):
                     )
 
                     if isinstance(sonuc, dict):
+
+                        if sonuc.get("success") is False:
+
+                            cevaplar.append(
+                                sonuc.get(
+                                    "error",
+                                    "Bilgisayar işlemi başarısız oldu."
+                                )
+                            )
+
+                            return {
+                                "response": cevaplar,
+                                "pending_plan": {
+                                    "steps": steps,
+                                    "_start_index": index
+                                }
+                            }
+
                         mesaj = sonuc.get(
                             "message",
                             sonuc.get(
@@ -53,7 +102,9 @@ def execute(plan):
                                 str(sonuc)
                             )
                         )
+
                     else:
+
                         mesaj = str(sonuc)
 
                     cevaplar.append(mesaj)
@@ -72,6 +123,24 @@ def execute(plan):
                     sonuc = yaz(content)
 
                     if isinstance(sonuc, dict):
+
+                        if sonuc.get("success") is False:
+
+                            cevaplar.append(
+                                sonuc.get(
+                                    "error",
+                                    "Klavye işlemi başarısız oldu."
+                                )
+                            )
+
+                            return {
+                                "response": cevaplar,
+                                "pending_plan": {
+                                    "steps": steps,
+                                    "_start_index": index
+                                }
+                            }
+
                         mesaj = sonuc.get(
                             "message",
                             sonuc.get(
@@ -79,7 +148,9 @@ def execute(plan):
                                 str(sonuc)
                             )
                         )
+
                     else:
+
                         mesaj = str(sonuc)
 
                     cevaplar.append(mesaj)
@@ -101,11 +172,14 @@ def execute(plan):
                     sonuc = ekran_oku()
 
                     if isinstance(sonuc, dict):
+
                         mesaj = sonuc.get(
                             "text",
                             "Yazı bulunamadı"
                         )
+
                     else:
+
                         mesaj = str(sonuc)
 
                     cevaplar.append(mesaj)
@@ -115,17 +189,34 @@ def execute(plan):
                     sonuc = tikla_yazi(target)
 
                     if isinstance(sonuc, dict):
+
+                        if sonuc.get("success") is False:
+
+                            cevaplar.append(
+                                sonuc.get(
+                                    "error",
+                                    "Ekrandaki yazıya tıklanamadı."
+                                )
+                            )
+
+                            return {
+                                "response": cevaplar,
+                                "pending_plan": {
+                                    "steps": steps,
+                                    "_start_index": index
+                                }
+                            }
+
                         mesaj = sonuc.get(
                             "message",
                             sonuc.get(
-                                "error",
-                                sonuc.get(
-                                    "response",
-                                    str(sonuc)
-                                )
+                                "response",
+                                str(sonuc)
                             )
                         )
+
                     else:
+
                         mesaj = str(sonuc)
 
                     cevaplar.append(mesaj)
@@ -144,52 +235,56 @@ def execute(plan):
                     action
                 )
 
-                # Google robot doğrulaması
                 if isinstance(sonuc, dict):
 
+                    # Google robot doğrulaması
                     if sonuc.get("robot_verification"):
 
-                        mesaj = sonuc.get(
-                            "error",
-                            "Google robot doğrulaması gerekiyor."
+                        cevaplar.append(
+                            sonuc.get(
+                                "error",
+                                "Google robot doğrulaması gerekiyor."
+                            )
                         )
-
-                        cevaplar.append(mesaj)
-
-                        # Kalan adımları sakla
-                        kalan_adimlar = steps[index:]
-
-                        pending_plan = {
-                            "goal": goal,
-                            "steps": kalan_adimlar
-                        }
 
                         return {
-                            "responses": cevaplar,
-                            "pending_plan": pending_plan
+                            "response": cevaplar,
+                            "pending_plan": {
+                                "steps": steps,
+                                "_start_index": index
+                            }
                         }
 
-                if isinstance(sonuc, dict):
 
+                    # Browser işlemi başarısız oldu
                     if sonuc.get("success") is False:
 
-                        mesaj = sonuc.get(
-                            "error",
+                        cevaplar.append(
                             sonuc.get(
-                                "message",
-                                str(sonuc)
+                                "error",
+                                sonuc.get(
+                                    "message",
+                                    str(sonuc)
+                                )
                             )
                         )
 
-                    else:
+                        return {
+                            "response": cevaplar,
+                            "pending_plan": {
+                                "steps": steps,
+                                "_start_index": index
+                            }
+                        }
 
-                        mesaj = sonuc.get(
-                            "message",
-                            sonuc.get(
-                                "response",
-                                str(sonuc)
-                            )
+
+                    mesaj = sonuc.get(
+                        "message",
+                        sonuc.get(
+                            "response",
+                            str(sonuc)
                         )
+                    )
 
                 else:
 
@@ -211,6 +306,23 @@ def execute(plan):
                     sonuc = tikla(target)
 
                     if isinstance(sonuc, dict):
+
+                        if sonuc.get("success") is False:
+
+                            cevaplar.append(
+                                sonuc.get(
+                                    "error",
+                                    "Mouse işlemi başarısız oldu."
+                                )
+                            )
+
+                            return {
+                                "response": cevaplar,
+                                "pending_plan": {
+                                    "steps": steps,
+                                    "_start_index": index
+                                }
+                            }
 
                         mesaj = sonuc.get(
                             "message",
@@ -240,19 +352,37 @@ def execute(plan):
                     f"Bilinmeyen tool: {tool}"
                 )
 
+                return {
+                    "response": cevaplar,
+                    "pending_plan": {
+                        "steps": steps,
+                        "_start_index": index
+                    }
+                }
 
-        # Her şey tamamlandı
+
+        # =========================
+        # TÜM STEPLER TAMAMLANDI
+        # =========================
+
         return {
-            "responses": cevaplar,
+            "response": cevaplar,
             "pending_plan": None
         }
 
 
+    # =========================
+    # GENEL HATA
+    # =========================
+
     except Exception as e:
 
         return {
-            "responses": [
+            "response": [
                 f"Executor hata: {str(e)}"
             ],
-            "pending_plan": None
+            "pending_plan": {
+                "steps": steps,
+                "_start_index": start_index
+            }
         }

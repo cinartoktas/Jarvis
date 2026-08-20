@@ -36,7 +36,15 @@ def calistir(target, action="open"):
 
         if aktif_site == "duckduckgo":
 
-            return duckduckgo_ilk_sonuc_ac()
+            sonuc = duckduckgo_ilk_sonuc_ac()
+
+            if isinstance(sonuc, dict):
+                return sonuc
+
+            return {
+                "success": False,
+                "error": "Alternatif arama sonucu açılamadı."
+            }
 
         sonuc = google_ilk_sonuc_ac()
 
@@ -44,12 +52,15 @@ def calistir(target, action="open"):
 
             if sonuc.get("robot_verification"):
 
+                # Google engellediyse alternatif arama sonucunu aç.
+                sonuc = duckduckgo_ilk_sonuc_ac()
+
+                if isinstance(sonuc, dict):
+                    return sonuc
+
                 return {
                     "success": False,
-                    "robot_verification": True,
-                    "error": (
-                        "Google robot doğrulaması istiyor."
-                    )
+                    "error": "Alternatif arama sonucu açılamadı."
                 }
 
             return sonuc
@@ -88,45 +99,26 @@ def calistir(target, action="open"):
         # YOUTUBE
         # -------------------------
 
-        if target.startswith("google "):
+        if target.startswith("youtube "):
 
             hedef = target.replace(
-                "google",
+                "youtube",
                 "",
-            1
+                1
             ).strip()
 
-            sonuc = google_ara(hedef)
+            sonuc = youtube_ara(hedef)
 
             if not sonuc.get("success", False):
-
-                if sonuc.get("robot_verification"):
-
-                    # Google engellediyse alternatif arama kullan.
-                    alternatif = duckduckgo_ara(hedef)
-
-                    if not alternatif.get("success", False):
-                        return alternatif
-
-                    aktif_site = "duckduckgo"
-
-                    return {
-                        "success": True,
-                        "message": (
-                            f"Google doğrulama istedi. "
-                            f"Alternatif aramada {hedef} aranıyor."
-                        ),
-                        "fallback": True
-                    }
-
                 return sonuc
 
-            aktif_site = "google"
+            aktif_site = "youtube"
 
             return {
-            "success": True,
-                "message": f"Google'da {hedef} aranıyor."
+                "success": True,
+                "message": f"YouTube'da {hedef} aranıyor."
             }
+
 
         # -------------------------
         # GOOGLE
@@ -146,13 +138,21 @@ def calistir(target, action="open"):
 
                 if sonuc.get("robot_verification"):
 
+                    # Google engellediyse DuckDuckGo'ya geç.
+                    alternatif = duckduckgo_ara(hedef)
+
+                    if not alternatif.get("success", False):
+                        return alternatif
+
+                    aktif_site = "duckduckgo"
+
                     return {
-                        "success": False,
-                        "error": (
-                            "Google robot doğrulaması istiyor. "
-                            "Lütfen Chrome'daki doğrulamayı tamamla."
+                        "success": True,
+                        "message": (
+                            f"Google doğrulama istedi. "
+                            f"Alternatif aramada {hedef} aranıyor."
                         ),
-                        "robot_verification": True
+                        "fallback": True
                     }
 
                 return sonuc
@@ -194,13 +194,20 @@ def calistir(target, action="open"):
 
                 if sonuc.get("robot_verification"):
 
+                    alternatif = duckduckgo_ara(target)
+
+                    if not alternatif.get("success", False):
+                        return alternatif
+
+                    aktif_site = "duckduckgo"
+
                     return {
-                        "success": False,
-                        "error": (
-                            "Google robot doğrulaması istiyor. "
-                            "Lütfen Chrome'daki doğrulamayı tamamla."
+                        "success": True,
+                        "message": (
+                            f"Google doğrulama istedi. "
+                            f"Alternatif aramada {target} aranıyor."
                         ),
-                        "robot_verification": True
+                        "fallback": True
                     }
 
                 return sonuc
@@ -208,6 +215,23 @@ def calistir(target, action="open"):
             return {
                 "success": True,
                 "message": f"Google'da {target} aranıyor."
+            }
+
+
+        # -------------------------
+        # AKTİF SITE DUCKDUCKGO
+        # -------------------------
+
+        if aktif_site == "duckduckgo":
+
+            sonuc = duckduckgo_ara(target)
+
+            if not sonuc.get("success", False):
+                return sonuc
+
+            return {
+                "success": True,
+                "message": f"Alternatif aramada {target} aranıyor."
             }
 
 
@@ -221,13 +245,20 @@ def calistir(target, action="open"):
 
             if sonuc.get("robot_verification"):
 
+                alternatif = duckduckgo_ara(target)
+
+                if not alternatif.get("success", False):
+                    return alternatif
+
+                aktif_site = "duckduckgo"
+
                 return {
-                    "success": False,
-                    "error": (
-                        "Google robot doğrulaması istiyor. "
-                        "Lütfen Chrome'daki doğrulamayı tamamla."
+                    "success": True,
+                    "message": (
+                        f"Google doğrulama istedi. "
+                        f"Alternatif aramada {target} aranıyor."
                     ),
-                    "robot_verification": True
+                    "fallback": True
                 }
 
             return sonuc

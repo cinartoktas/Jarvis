@@ -306,7 +306,8 @@ def youtube_ilk_video_ac():
 
         browser = browser_ac()
 
-        time.sleep(2)
+        # YouTube sonuçlarının yüklenmesini bekle
+        time.sleep(4)
 
         videolar = browser.find_elements(
             "css selector",
@@ -323,6 +324,9 @@ def youtube_ilk_video_ac():
                 href = video.get_attribute("href")
 
                 if not href:
+                    continue
+
+                if "/watch?v=" not in href:
                     continue
 
                 baslik = video.text.strip()
